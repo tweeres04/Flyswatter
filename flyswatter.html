@@ -48,6 +48,7 @@
 			var score = 0;
 			var emitter;
 			var scoreBackground;
+			var flyTimer = 0;
 
 			function startGame(){
 				game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'container', { preload: preload, create: create, update: update });
@@ -63,6 +64,10 @@
 
 			function Fly(x, y){
 				var me = this;
+				if(!x && !y){
+					x = game.world.randomX;
+					y = game.world.randomY;
+				}
 				Phaser.Sprite.call(me, game, x, y, "fly");
 				var scale = game.rnd.realInRange(0.8, 1.5);
 				me.scale.setTo(scale, scale);
@@ -96,7 +101,7 @@
 
 				var flies = [];
 				for(var i = 0; i < totalFlies; i++){
-					flies[i] = new Fly(game.world.randomX, game.world.randomY);
+					flies[i] = new Fly();
 					game.add.existing(flies[i]);
 				}
 
@@ -110,7 +115,11 @@
 			}
 
 			function update() {
-
+				if(game.time.now > flyTimer){
+					var fly = new Fly();
+					game.add.existing(fly);
+					flyTimer = game.time.now + 1000;
+				}
 			}
 
 			function particleBurst(){
