@@ -2,36 +2,70 @@
 <html>
 <head>
 	<title>Flyswatter</title>
+	<meta name="viewport" content="width=device-width, user-scalable=no">
 	<style>
-		.container {
-			width: 1280px;
-			margin:0 auto;
+		* { font-family: Helvetica, Arial, sans-serif; }
+		body { margin: 0; }
+		#score { position: absolute;
+			top: 15px;
+			left: 15px;
+			background-color: rgba(256, 256, 256, 0.5);
+			padding: 5px 10px;
+			border: 1px solid rgba(256, 256, 256, 0.8);
+			-webkit-user-select: none;
+			cursor: default;
+			color: #444;
+			font-size: 32px;
+			display:none;
+		}
+		#start-button {
+			position:absolute;
+			font-size:32px;
+			cursor:pointer;
+		}
+		@media (max-width: 1920px){
+			#score {
+				font-size: 18px;
+			}
 		}
 	</style>
 </head>
 <body>
 	<div class="container" id="container">
-		<h1>Flyswatter</h1>
+		<div id="score">Score: 0</div>
+		<div id="start-button">Start Swatting</div>
 	</div>
 	<script src="phaser.js"></script>
 	<script>
 		(function(){
-			var width = 1280;
-			var height = 720;
-			var game = new Phaser.Game(width, height, Phaser.AUTO, 'container', { preload: preload, create: create, update: update });
+			var resolutions = {
+				"1080p": { x: 1920, y: 1080 },
+				"720p": { x: 1280, y: 720 },
+				"480p": { x: 854, y: 480 }
+			};
+
+			var game;
 			var score = 0;
-			var text;
 			var emitter;
+			var scoreBackground;
+
+			function startGame(){
+				game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'container', { preload: preload, create: create, update: update });
+				document.getElementById("container").removeChild(startButton);
+				document.getElementById("score").style.display = "block";
+			}
 
 			function preload() {
 				game.load.image("fly", "assets/fly.png");
 				game.load.image("dot", "assets/dot.png");
+				game.load.image("bg", "assets/bg.png");
 			}
 
 			function Fly(x, y){
 				var me = this;
 				Phaser.Sprite.call(me, game, x, y, "fly");
-				me.scale.setTo(0.1, 0.1);
+				var scale = game.rnd.realInRange(0.8, 1.5);
+				me.scale.setTo(scale, scale);
 
 				me.inputEnabled = true;
 				me.events.onInputDown.add(flyClick, this);
@@ -40,29 +74,31 @@
 
 				function flyClick(){
 					me.destroy();
-					score += 10;
+					score += Math.round(10 * scale);
 					updateScore();
 				}
 			}
 
 			function updateScore(){
-				text.setText("Score: " + score);
+				document.getElementById("score").innerHTML = "Score: " + score;
 			}
 
 			Fly.prototype = Object.create(Phaser.Sprite.prototype);
 			Fly.prototype.constructor = Fly;
 
 			function create() {
+				game.add.tileSprite(0, 0, game.width, game.height, "bg");
+				game.antialias = true;
+
+				game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL;
+
+				var totalFlies = game.width * game.height / 4000;
+
 				var flies = [];
-				for(var i = 0; i < 500; i++){
+				for(var i = 0; i < totalFlies; i++){
 					flies[i] = new Fly(game.world.randomX, game.world.randomY);
 					game.add.existing(flies[i]);
 				}
-
-				text = game.add.text(0, 0, "Score: 0", {
-			        font: "24px Helvetica",
-			        fill: "#eeeeee"
-			    });
 
 			    emitter = game.add.emitter();
 			    emitter.makeParticles("dot");
@@ -83,6 +119,11 @@
 
 			    emitter.start(true, 500, null, 5);
 			}
+
+			var startButton = document.getElementById("start-button");
+			startButton.style.top = (window.innerHeight / 4) + "px";
+			startButton.style.left = (window.innerWidth / 2 - startButton.offsetWidth / 2) + "px";
+			startButton.onclick = startGame;
 		})();
 	</script>
 </body>
