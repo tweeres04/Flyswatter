@@ -2,14 +2,88 @@
 <html>
 <head>
 	<title>Flyswatter</title>
+	<style>
+		.container {
+			width: 1280px;
+			margin:0 auto;
+		}
+	</style>
 </head>
 <body>
-	<div class="container">
+	<div class="container" id="container">
 		<h1>Flyswatter</h1>
 	</div>
 	<script src="phaser.js"></script>
 	<script>
+		(function(){
+			var width = 1280;
+			var height = 720;
+			var game = new Phaser.Game(width, height, Phaser.AUTO, 'container', { preload: preload, create: create, update: update });
+			var score = 0;
+			var text;
+			var emitter;
 
+			function preload() {
+				game.load.image("fly", "assets/fly.png");
+				game.load.image("dot", "assets/dot.png");
+			}
+
+			function Fly(x, y){
+				var me = this;
+				Phaser.Sprite.call(me, game, x, y, "fly");
+				me.scale.setTo(0.1, 0.1);
+
+				me.inputEnabled = true;
+				me.events.onInputDown.add(flyClick, this);
+
+				this.angle = game.rnd.integerInRange(0, 360);
+
+				function flyClick(){
+					me.destroy();
+					score += 10;
+					updateScore();
+				}
+			}
+
+			function updateScore(){
+				text.setText("Score: " + score);
+			}
+
+			Fly.prototype = Object.create(Phaser.Sprite.prototype);
+			Fly.prototype.constructor = Fly;
+
+			function create() {
+				var flies = [];
+				for(var i = 0; i < 500; i++){
+					flies[i] = new Fly(game.world.randomX, game.world.randomY);
+					game.add.existing(flies[i]);
+				}
+
+				text = game.add.text(0, 0, "Score: 0", {
+			        font: "24px Helvetica",
+			        fill: "#eeeeee"
+			    });
+
+			    emitter = game.add.emitter();
+			    emitter.makeParticles("dot");
+			    emitter.gravity = 10;
+			    emitter.minParticleScale = 0.25;
+			    emitter.maxParticleScale = 0.5;
+
+			    game.input.onDown.add(particleBurst, this);
+			}
+
+			function update() {
+
+			}
+
+			function particleBurst(){
+			    emitter.x = game.input.x;
+			    emitter.y = game.input.y;
+
+			    emitter.start(true, 500, null, 5);
+			}
+		})();
 	</script>
 </body>
 </html>
