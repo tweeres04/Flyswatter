@@ -116,12 +116,13 @@
 
 			function update() {
 				if(game.time.now > flyTimer){
-					var chanceOfHorde = game.rnd.integerInRange(1, 10) == 1;
+					var chanceOfHorde = game.rnd.integerInRange(1, 10) < 3;
 					if(chanceOfHorde){
 						for(var i = 0; i < 10; i++){
 							var fly = new Fly();
 							game.add.existing(fly);
 						}
+						showHordeText();
 					} else {
 						var fly = new Fly();
 						game.add.existing(fly);
@@ -135,6 +136,18 @@
 			    emitter.y = game.input.y;
 
 			    emitter.start(true, 500, null, 5);
+			}
+
+			function showHordeText(){
+				var text = "Horde!";
+				var style = { font: "bold 40pt Arial", fill: "#ffffff", align: "center", stroke: "#258acc", strokeThickness: 8 };
+
+				var s = game.add.text(game.world.centerX, game.world.centerY / 4, text, style);
+				s.anchor.setTo(0.5, 0.5);
+
+				setTimeout(function(){
+					s.destroy();
+				}, 1500)
 			}
 
 			var startButton = document.getElementById("start-button");
