@@ -49,6 +49,8 @@
 			var emitter;
 			var scoreBackground;
 			var flyTimer = 0;
+			var hordeText;
+
 
 			function startGame(){
 				game = new Phaser.Game(window.innerWidth, window.innerHeight, Phaser.AUTO, 'container', { preload: preload, create: create, update: update });
@@ -141,13 +143,24 @@
 			function showHordeText(){
 				var text = "Horde!";
 				var style = { font: "bold 40pt Arial", fill: "#ffffff", align: "center", stroke: "#258acc", strokeThickness: 8 };
+				var initialY = -30;
 
-				var s = game.add.text(game.world.centerX, game.world.centerY / 4, text, style);
-				s.anchor.setTo(0.5, 0.5);
+				if(hordeText && hordeText.exists){
+					hordeText.destroy();
+				}
+
+				hordeText = game.add.text(game.world.centerX, initialY, text, style);
+				hordeText.anchor.setTo(0.5, 0.5);
+
+				var tween = game.add.tween(hordeText).to({ y: game.world.centerY / 4 }, 200, Phaser.Easing.Quadratic.Out)
+				.chain(game.add.tween(hordeText.scale).to({ x: 1.1, y: 1.1 }, 1500, Phaser.Easing.Linear.None))
+				.start();
 
 				setTimeout(function(){
-					s.destroy();
-				}, 1500)
+					if(hordeText.exists){
+						hordeText.destroy();
+					}
+				}, 1700);
 			}
 
 			var startButton = document.getElementById("start-button");
